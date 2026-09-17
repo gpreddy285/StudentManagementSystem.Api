@@ -14,5 +14,8 @@ namespace StudentManagementSystem.Api.Data
 
         public DbSet<Teacher> Teachers { get; set; }
 
+        public DbSet<Mark> Marks { get; set; }
+        public DbSet<Attendance> Attendances { get; set; }
+
     }
 }

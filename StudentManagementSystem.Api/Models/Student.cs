@@ -18,5 +18,7 @@ namespace StudentManagementSystem.Api.Models
 
         public int TeacherId {  get; set; }
         public Teacher? Teacher { get; set; }
+        [JsonIgnore]
+        public ICollection<Mark>? Marks { get; set; }
     }
 }
