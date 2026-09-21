@@ -1,9 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using StudentManagementSystem.Api.Models;
 
 namespace StudentManagementSystem.Api.Data
 {
-    public class StudentDbContext:DbContext
+    public class StudentDbContext:IdentityDbContext
     {
         public StudentDbContext(DbContextOptions<StudentDbContext> options) : base(options)
         {

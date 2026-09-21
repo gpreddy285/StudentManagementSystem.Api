@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using StudentManagementSystem.Api.Data;
@@ -8,6 +10,7 @@ namespace StudentManagementSystem.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class StudentsController : ControllerBase
     {
         private readonly StudentDbContext _context;
@@ -70,8 +73,5 @@ namespace StudentManagementSystem.Api.Controllers
             _context.SaveChanges();
             return Ok(student);
         }
-       
-
-
     }
 }
