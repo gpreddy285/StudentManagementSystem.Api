@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using StudentManagementSystem.Api.Data;
 using StudentManagementSystem.Api.Models;
@@ -16,12 +18,14 @@ namespace StudentManagementSystem.Api.Controllers
             _context = context;
         }
         [HttpGet]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,Roles = "Admin,Teacher,Student")]
         public IActionResult GetAttendances()
         {
             var attendances = _context.Attendances.Include(a => a.Student).ToList();
             return Ok(attendances);
         }
         [HttpPost]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin,Teacher")]
         public IActionResult CreateAttendance(Attendance attendance)
         {
             _context.Attendances.Add(attendance);
@@ -29,6 +33,8 @@ namespace StudentManagementSystem.Api.Controllers
             return Ok(attendance);
         }
         [HttpGet("{id}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin,Teacher,Student")]
+
         public IActionResult GetAttendance(int id)
         {
             var attendance = _context.Attendances.Include(a => a.Student).FirstOrDefault(a => a.AttendanceId == id);
@@ -39,6 +45,9 @@ namespace StudentManagementSystem.Api.Controllers
             return Ok(attendance);
         }
         [HttpPut("{id}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin,Teacher")]
+
+
         public IActionResult UpdateAttendance(int id, Attendance attendance)
         {
             var existingAttendance = _context.Attendances.Find(id);
@@ -53,6 +62,8 @@ namespace StudentManagementSystem.Api.Controllers
             return Ok(existingAttendance);
         }
         [HttpDelete("{id}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin,Teacher")]
+
         public IActionResult DeleteAttendance(int id)
         {
             var attendance = _context.Attendances.Find(id);

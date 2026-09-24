@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -13,10 +16,12 @@ namespace StudentManagementSystem.Api.Controllers
     public class AuthController : ControllerBase
     {
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
-        public AuthController(UserManager<IdentityUser> userManager)
+        public AuthController(UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager)
         {
             _userManager = userManager;
+            _roleManager = roleManager;
         }
 
         [HttpPost("register")]
@@ -46,17 +51,24 @@ namespace StudentManagementSystem.Api.Controllers
                 return Unauthorized("Invalid username or password");
             }
 
+
             var result = _userManager.CheckPasswordAsync(user, password).Result;
 
             if (!result)
             {
                 return Unauthorized("Invalid username or password");
             }
+            var roles = _userManager.GetRolesAsync(user).Result;
 
-            var claims = new[]
+            var claims = new List<Claim>
             {
-               new Claim(ClaimTypes.Name, user.UserName)
-            };
+             new Claim(ClaimTypes.Name, user.UserName)
+             };
+            foreach (var role in roles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
+
 
             var key = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes("ThisIsMySecretKeyForStudentManagementSystem123"));
@@ -73,6 +85,43 @@ namespace StudentManagementSystem.Api.Controllers
             var jwt = new JwtSecurityTokenHandler().WriteToken(token);
 
             return Ok(jwt);
+        }
+        [HttpPost("create-roles")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
+
+        public IActionResult CreateRoles()
+        {
+            string[] roles = { "Admin", "Teacher", "Student" };
+
+            foreach (var role in roles)
+            {
+                if (!_roleManager.RoleExistsAsync(role).Result)
+                {
+                    _roleManager.CreateAsync(new IdentityRole(role)).Wait();
+                }
+            }
+
+            return Ok("Roles created successfully");
+        }
+        [HttpPost("assign-role")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,Roles = "Admin")]
+        public IActionResult AssignRole(string username, string role)
+        {
+            var user = _userManager.FindByNameAsync(username).Result;
+
+            if (user == null)
+            {
+                return NotFound("User not found");
+            }
+
+            var result = _userManager.AddToRoleAsync(user, role).Result;
+
+            if (!result.Succeeded)
+            {
+                return BadRequest(result.Errors);
+            }
+
+            return Ok("Role assigned successfully");
         }
     }
 }

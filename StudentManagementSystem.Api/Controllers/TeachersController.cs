@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using StudentManagementSystem.Api.Data;
 using StudentManagementSystem.Api.Models;
@@ -16,12 +18,15 @@ namespace StudentManagementSystem.Api.Controllers
             _context = context;
         }
         [HttpGet]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,Roles = "Admin,Teacher,Student")]
         public IActionResult GetTeachers()
         {
             var teacher=_context.Teachers.ToList();
             return Ok(teacher);
         }
         [HttpGet("{id}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin,Teacher,Student")]
+
         public IActionResult GetTeacher(int id)
         {
             var teacher=_context.Teachers.Find(id);
@@ -32,6 +37,8 @@ namespace StudentManagementSystem.Api.Controllers
             return Ok(teacher);
         }
         [HttpPost]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
+
         public IActionResult CreateTeacher(Teacher teacher)
         {
             _context.Teachers.Add(teacher);
@@ -39,6 +46,8 @@ namespace StudentManagementSystem.Api.Controllers
             return Ok(teacher);
         }
         [HttpPut("{id}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
+
         public IActionResult UpdateTeacher(int id,Teacher teacher)
         {
             var existing = _context.Teachers.Find(id);
@@ -53,6 +62,8 @@ namespace StudentManagementSystem.Api.Controllers
             return Ok(existing);
         }
         [HttpDelete("{id}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
+
         public IActionResult DeleteTeacher(int id)
         {
             var teacher = _context.Teachers.Find(id);

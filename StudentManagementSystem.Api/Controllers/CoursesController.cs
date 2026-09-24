@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using StudentManagementSystem.Api.Data;
@@ -17,6 +19,7 @@ namespace StudentManagementSystem.Api.Controllers
             _context = context;
         }
         [HttpGet]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,Roles = "Admin,Teacher,Student")]
         public IActionResult GetCourses()
         {
             var courses=_context.Courses.ToList();
@@ -24,6 +27,7 @@ namespace StudentManagementSystem.Api.Controllers
         }
 
         [HttpPost]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,Roles = "Admin")]
         public IActionResult CreateCourse(Course course)
         {
             _context.Courses.Add(course);
@@ -31,6 +35,8 @@ namespace StudentManagementSystem.Api.Controllers
             return Ok(course);
         }
         [HttpGet("{id}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin,Teacher,Student")]
+
         public IActionResult GetCourse(int id)
         {
             var course = _context.Courses.Include(c=>c.Students).FirstOrDefault(c=>c.CourseId==id);
@@ -41,6 +47,7 @@ namespace StudentManagementSystem.Api.Controllers
             return Ok(course);
         }
         [HttpPut("{id}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,Roles = "Admin")]
         public IActionResult UpdateCourse(int id,Course course)
         {
             var existing = _context.Courses.Find(id);
@@ -55,6 +62,7 @@ namespace StudentManagementSystem.Api.Controllers
             return Ok(course);
         }
         [HttpDelete]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,Roles = "Admin")]
         public IActionResult DeleteCourse(int id)
         {
             var course=_context.Courses.Find(id);

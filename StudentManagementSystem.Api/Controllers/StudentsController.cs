@@ -10,7 +10,7 @@ namespace StudentManagementSystem.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin,Teacher")]
     public class StudentsController : ControllerBase
     {
         private readonly StudentDbContext _context;
@@ -18,6 +18,12 @@ namespace StudentManagementSystem.Api.Controllers
         public StudentsController(StudentDbContext context)
         {
             _context = context;
+        }
+        [HttpGet("admin-test")]
+        [Authorize(Roles = "Admin")]
+        public IActionResult AdminTest()
+        {
+            return Ok("Only Admin can access this");
         }
 
         [HttpGet]
@@ -39,6 +45,7 @@ namespace StudentManagementSystem.Api.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles="Admin")]
         public IActionResult CreateStudent(Student student)
         {
             _context.Students.Add(student);
@@ -46,6 +53,7 @@ namespace StudentManagementSystem.Api.Controllers
             return Ok(student);
         }
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public IActionResult UpdateStudent(int id,Student student)
         {
             var existing = _context.Students.Find(id);
@@ -62,6 +70,7 @@ namespace StudentManagementSystem.Api.Controllers
             return Ok(existing);
         }
         [HttpDelete]
+        [Authorize(Roles = "Admin")]
         public IActionResult DeleteStudent(int id)
         {
             var student= _context.Students.Find(id);
@@ -72,6 +81,17 @@ namespace StudentManagementSystem.Api.Controllers
             _context.Students.Remove(student);
             _context.SaveChanges();
             return Ok(student);
+        }
+        [HttpGet("my-claims")]
+        public IActionResult MyClaims()
+        {
+            var claims = User.Claims.Select(c => new
+            {
+                c.Type,
+                c.Value
+            });
+
+            return Ok(claims);
         }
     }
 }
